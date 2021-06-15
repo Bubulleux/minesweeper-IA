@@ -3,12 +3,20 @@
 
 int mouse_click(int btn, int x, int y, t_vars *vars)
 {
-	if (vars->game->gamover || btn == 2)
+	if (vars->game->gamover)
 	{
+		if (btn == 2)
+			return 1;
+		
 		alloc_game(vars);
 		init_game(vars->game);
 		render(vars);
 		return 1;
+	}
+	if (btn == 2)
+	{
+		render_all_game(vars);
+		play_ia(vars);
 	}
 	if (x >= 5 && x < WIDTH * CELL_SIZE + 5 && y >= 35 && y < HEIGHT * CELL_SIZE + 35)
 	{
@@ -33,9 +41,7 @@ int main()
 
 	vars->game = NULL;
 
-	char c = 0xc8;
-	printf("%X %X\n", c, (c & 0xf0) | 4);
-
+	
 	alloc_game(vars);
 
 	init_game(vars->game);

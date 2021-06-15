@@ -69,6 +69,13 @@ void render_cell(t_vars *vars, char value, int x , int y)
 	}
 }
 
+void render_cell_chance(t_vars *vars, double chance, int x , int y)
+{
+	char num[30];
+	sprintf(num, "%d", (int)floor(chance * 100.0));
+	mlx_string_put(vars->mlx, vars->window, x * CELL_SIZE + 13, y * CELL_SIZE + 55, 0x00111111, num);
+}
+
 void set_pixel(t_img *img, int x, int y, int color)
 {
 	char **dst;

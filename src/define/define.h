@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include <strings.h>
+#include <math.h>
 
 //--------Const--------
 
@@ -12,7 +13,7 @@
 #define WIDTH 20
 #define CELL_SIZE 32
 
-#define BOMBE_COUNT 2
+#define BOMBE_COUNT 50
 
 //Color
 #define COLOR_BOMBE 0x00ff0000
@@ -62,6 +63,7 @@ void render(t_vars *vars);
 void render_all_game(t_vars *vars);
 void render_cell(t_vars *vars, char value, int x, int y);
 void set_pixel(t_img *img, int x, int y, int color);
+void render_cell_chance(t_vars *vars, double chance, int x , int y);
 
 //game.c
 void init_game(t_game *game);
@@ -72,3 +74,7 @@ void check_finish(t_game *game);
 
 //main.c
 int mouse_click(int btn, int x, int y, t_vars *vars);
+
+//ia_controler.c
+void play_ia(t_vars *vars);
+double** get_chance_cell(t_game *game);

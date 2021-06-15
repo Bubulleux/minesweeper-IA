@@ -38,16 +38,13 @@ void init_game(t_game *game)
 			{
 				int _x = x + neighbour[i][0];
 				int _y = y + neighbour[i][1];
-				printf("%d   %d \n", _x, _y);
 				if (_x != -1 && _x != WIDTH && _y != -1 && _y != HEIGHT && (game->board[_x][_y] & 0x0F) == 0x0F)
 				{
-					printf("ADD neighbour bombe");
 					neighbour_bombe += 1;
 				}
 			}
 
 			game->board[x][y] = (game->board[x][y] & 0xF0) | neighbour_bombe;
-			printf("%d, %d: %d   %X   \n", x, y, neighbour_bombe, game->board[x][y]);
 		}
 	}
 }
@@ -55,7 +52,7 @@ void init_game(t_game *game)
 void break_box(t_vars *vars, int x, int y)
 {
 	t_game *game = vars->game;
-	printf("Break %d %d\n", x, y);
+	//printf("Break %d %d\n", x, y);
 	if ((game->board[x][y] & 0xF0) != 0x10)
 		return;
 	
@@ -90,7 +87,6 @@ void set_flag(t_vars *vars, int x, int y)
 	
 	char value = (vars->game->board[x][y] & 0xF0) == 0x10 ? 0x20 : 0x10;
 	vars->game->board[x][y] = (vars->game->board[x][y] & 0x0F) | value;
-	printf("flag: %X\n", vars->game->board[x][y]);
 	render_cell(vars, vars->game->board[x][y], x, y);
 }
 
