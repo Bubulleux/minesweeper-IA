@@ -15,13 +15,6 @@ void render_all_game(t_vars *vars)
 		{
 			char value = vars->game->board[x][y];
 			render_cell(vars, value, x, y);
-			if ((value & 0x0F) != 0x0F && (value & 0x0F) != 0x00 && (value & 0x0F) != 0x0F)
-			{
-				char num[30];
-				printf("%d", (value & 0x0F));
-				sprintf(num, "%d", (value & 0x0F));
-				mlx_string_put(vars->mlx, vars->window, x * CELL_SIZE + 19, y * CELL_SIZE + 55, 0x00111111, num);
-			}
 		}
 	}
 	
@@ -35,12 +28,21 @@ void render_cell(t_vars *vars, char value, int x , int y)
 	img->addr = mlx_get_data_addr(img->img, &img->bit_per_pixel, &img->line_lenght, &img->endian);
 
 	int color = 0x000000;
-	if ((value & 0x0F) == 0x0F)
-		color = COLOR_BOMBE;
-	else
+	if ((value & 0xF0) == 0x10)
 		color = COLOR_HIDE;
-	
-	
+	else if ((value & 0xF0) == 0x20)
+	{
+		color = COLOR_FLAG;
+	}
+	else if ((value & 0xF0) == 0x00 && (value & 0x0F) != 0x0F)
+	{
+		color = COLOR_BG;
+	}
+	else
+	{
+		color = COLOR_BOMBE;
+	}
+
 
 	for(int _x = 0; _x < CELL_SIZE; _x++)
 	{
@@ -58,6 +60,13 @@ void render_cell(t_vars *vars, char value, int x , int y)
 	mlx_put_image_to_window(vars->mlx, vars->window, img->img, x * CELL_SIZE + 5, y * CELL_SIZE + 35);
 	mlx_destroy_image(vars->mlx, img->img);
 	free(img);
+
+	if ((value & 0x0F) != 0x0F && (value & 0x0F) != 0x00 && (value & 0xF0) == 0x00)
+	{
+		char num[30];
+		sprintf(num, "%d", (value & 0x0F));
+		mlx_string_put(vars->mlx, vars->window, x * CELL_SIZE + 19, y * CELL_SIZE + 55, 0x00111111, num);
+	}
 }
 
 void set_pixel(t_img *img, int x, int y, int color)
