@@ -75,6 +75,7 @@ void break_box(t_vars *vars, int x, int y)
 	if ((game->board[x][y] & 0x0F) == 0x0F)
 	{
 		game->gamover = true;
+		game->lose += 1;
 	}
 }
 
@@ -125,5 +126,11 @@ void check_finish(t_game *game)
 	if (hide_box_count <= BOMBE_COUNT)
 	{
 		game->gamover = true;
+		game->win += 1;
 	}
+}
+
+bool is_out(int x, int y)
+{
+	return (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT);
 }

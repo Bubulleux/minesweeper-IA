@@ -48,8 +48,8 @@ void play_ia(t_vars *vars)
 				}
 				else
 				{
+					printf("value: %f\n", min);
 					break_box(vars, x, y);
-					printf("IA Play: %d %d \n", x, y);
 					break_loop = true;
 					break;
 				}
@@ -84,7 +84,7 @@ double** get_chance_cell(t_game *game)
 	{
 		for (int y = 0; y < HEIGHT; y++)
 		{
-			board_of_chance[x][y] = 0;
+			board_of_chance[x][y] = -1;
 			board_count[x][y] = 0;
 		}
 	}
@@ -95,35 +95,36 @@ double** get_chance_cell(t_game *game)
 			if ((game->board[x][y] & 0xF0) != 0x00 || (game->board[x][y] & 0x0F) == 0x00 || (game->board[x][y] & 0x0F) == 0x0F)
 			{
 				continue;
-			}
-			
+			}		
 
 			int neighbour_count = 0;
 			for (int i = 0; i < 8; i++)
 			{
-				if (x + neighbour_ia[i][0] < 0 || x + neighbour_ia[i][0] >= WIDTH || y + neighbour_ia[i][1] < 0 || y + neighbour_ia[i][0] >= HEIGHT)
+				int n_x = x + neighbour_ia[i][0], n_y = y + neighbour_ia[i][1];
+				if (is_out(n_x, n_y))
 				{
 					continue;
 				}
 
-				if ((game->board[x + neighbour_ia[i][0]][y + neighbour_ia[i][1]] & 0xF0) != 0x00)
+				if ((game->board[n_x][n_y] & 0xF0) != 0x00)
 				{
-					neighbour_count +=1;
+					neighbour_count += 1;
 				}
 			}
-
-			for (int i = 0; i < 8; i++)
+			if (neighbour_count <= (game->board[x][y] & 0x0F))
 			{
-				if (x + neighbour_ia[i][0] < 0 || x + neighbour_ia[i][0] >= WIDTH || y + neighbour_ia[i][1] < 0 || y + neighbour_ia[i][0] >= HEIGHT)
+				for (int i = 0; i < 8; i++)
 				{
-					continue;
-				}
-				if ((game->board[x + neighbour_ia[i][0]][y + neighbour_ia[i][1]] & 0xF0) != 0x00)
-				{
-					board_of_chance[x + neighbour_ia[i][0]][y + neighbour_ia[i][1]] += pow((double)(game->board[x][y] & 0x0F) / (double)neighbour_count, 2);
-					printf("neighbour %d %d value: %d \n", x + neighbour_ia[i][0], y + neighbour_ia[i][1], board_count[x + neighbour_ia[i][0]][y + neighbour_ia[i][1]]);
-					board_count[x + neighbour_ia[i][0]][y + neighbour_ia[i][1]] += 1;
-					printf("new value %d\n", board_count[x + neighbour_ia[i][0]][y + neighbour_ia[i][1]]);
+					int n_x = x + neighbour_ia[i][0], n_y = y + neighbour_ia[i][1];
+					if (is_out(n_x, n_y))
+					{
+						continue;
+					}
+
+					if ((game->board[n_x][n_y] & 0xF0) != 0x00)
+					{
+						board_of_chance[n_x][n_y] = 1;
+					}
 				}
 			}
 		}
@@ -133,18 +134,113 @@ double** get_chance_cell(t_game *game)
 	{
 		for (int y = 0; y < HEIGHT; y++)
 		{
-			if ((game->board[x][y] & 0xF0) == 0x00)
+			if ((game->board[x][y] & 0xF0) != 0x00 || (game->board[x][y] & 0x0F) == 0x00 || (game->board[x][y] & 0x0F) == 0x0F)
 			{
 				continue;
 			}
-			printf("%d %d,     %d      %f    %f\n", x, y, board_count[x][y], board_of_chance[x][y], board_of_chance[x][y] / (double)board_count[x][y]);
-			if (board_of_chance[x][y] == 0 || board_count[x][y] == 0)
+			
+
+			int neighbour_count_bombe = 0;
+			for (int i = 0; i < 8; i++)
+			{
+				int n_x = x + neighbour_ia[i][0], n_y = y + neighbour_ia[i][1];
+				if (is_out(n_x, n_y))
+				{
+					continue;
+				}
+
+				if ((game->board[n_x][n_y] & 0xF0) != 0x00 && board_of_chance[n_x][n_y] == 1)
+				{
+					neighbour_count_bombe += 1;
+				}
+			}
+			if (neighbour_count_bombe >= (game->board[x][y] & 0x0F))
+			{
+				for (int i = 0; i < 8; i++)
+				{
+					int n_x = x + neighbour_ia[i][0], n_y = y + neighbour_ia[i][1];
+					if (is_out(n_x, n_y))
+					{
+						continue;
+					}
+					if ((game->board[n_x][n_y] & 0xF0) != 0x00 && board_of_chance[n_x][n_y] == -1)
+					{
+						board_of_chance[n_x][n_y] = 0;
+					}
+				}
+			}
+		}
+	}
+
+	for (int x = 0; x < WIDTH; x++)
+	{
+		for (int y = 0; y < HEIGHT; y++)
+		{
+			if ((game->board[x][y] & 0xF0) != 0x00 || (game->board[x][y] & 0x0F) == 0x00 || (game->board[x][y] & 0x0F) == 0x0F)
+			{
+				continue;
+			}
+			
+
+			int neighbour_bombe = 0;
+			int neighbour_voide = 0;
+			int neighbour_count = 0;
+			for (int i = 0; i < 8; i++)
+			{
+				int n_x = x + neighbour_ia[i][0], n_y = y + neighbour_ia[i][1];
+				if (is_out(n_x, n_y))
+				{
+					continue;
+				}
+
+				if ((game->board[n_x][n_y] & 0xF0) != 0)
+				{
+					neighbour_count += 1;
+					if (board_of_chance[n_x][n_y] == 1)
+					{
+						neighbour_bombe += 1;
+					}
+					if (board_of_chance[n_x][n_y] == 0)
+					{
+						neighbour_voide += 1;
+					}
+				}
+			}
+			if (neighbour_bombe < (game->board[x][y] & 0x0F))
+			{
+				double luck = ((game->board[x][y] & 0x0F) - neighbour_bombe) / (double)(neighbour_count - neighbour_bombe - neighbour_voide);
+				for (int i = 0; i < 8; i++)
+				{
+					int n_x = x + neighbour_ia[i][0], n_y = y + neighbour_ia[i][1];
+					if (is_out(n_x, n_y))
+					{
+						continue;
+					}
+					if ((game->board[n_x][n_y] & 0xF0) != 0x00 && board_of_chance[n_x][n_y] != 0 && board_of_chance[n_x][n_y] != 1)
+					{
+						if (board_of_chance[n_x][n_y] == -1)
+						{
+							board_of_chance[n_x][n_y] = 0;
+						}
+						board_of_chance[n_x][n_y] += luck;
+						board_count[n_y][n_y] +=1 ;
+					}
+				}
+			}
+		}
+	}
+
+	for (int x = 0; x < WIDTH; x++)
+	{
+		for (int y = 0; y < HEIGHT; y++)
+		{
+			if (board_of_chance[x][y] == -1)
 			{
 				board_of_chance[x][y] = 0.9;
 			}
-			else
+			if (board_count[x][y] != 0)
 			{
-				board_of_chance[x][y] = board_of_chance[x][y] / (double)board_count[x][y]; 
+				board_of_chance[x][y] = board_of_chance[x][y] / (double)board_count[x][y];
 			}
 		}
 	}
@@ -157,3 +253,4 @@ double** get_chance_cell(t_game *game)
 
 	return board_of_chance;
 }
+

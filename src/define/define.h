@@ -9,11 +9,11 @@
 //--------Const--------
 
 //Game-Size
-#define HEIGHT 20
-#define WIDTH 20
+#define HEIGHT 14
+#define WIDTH 18
 #define CELL_SIZE 32
 
-#define BOMBE_COUNT 50
+#define BOMBE_COUNT 40
 
 //Color
 #define COLOR_BOMBE 0x00ff0000
@@ -33,6 +33,8 @@ typedef struct s_game
 {
 	unsigned char **board;
 	bool gamover;
+	int win;
+	int lose;
 } t_game;
 
 typedef struct s_vars
@@ -71,6 +73,7 @@ void break_box(t_vars *vars, int x, int y);
 void set_flag(t_vars *vars, int x, int y);
 void alloc_game(t_vars *vars);
 void check_finish(t_game *game);
+bool is_out(int x, int y);
 
 //main.c
 int mouse_click(int btn, int x, int y, t_vars *vars);
